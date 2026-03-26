@@ -3,57 +3,51 @@ const Meal = require('../models/meal.js');
 
 exports.newMeal = asyncHandler(async (req, res, next) => {
     const newMeal = new Meal({
-        uid: req.body.uid, 
+        uid: req.body.uid,
         dailyid: req.body.dailyid,
         datetime: req.body.datetime,
         cal: req.body.cal,
         fat: req.body.fat,
         carbs: req.body.carbs,
         proteins: req.body.proteins,
+        fibers: req.body.fibers,
+        sugars: req.body.sugars,
         sodium: req.body.sodium,
         waste: req.body.waste,
         mealdesc: req.body.mealdesc,
         mealname: req.body.mealname,
-        foodgroups:  req.body.foodgroups,
+        foodgroups: req.body.foodgroups,
     });
-    await newMeal.save()
-            .then(() => {
-                res.status(201).json(newMeal); // send _id nalang
-            })
-            .catch((error) => {
-                res.status(400).send("Adding meal was unsuccessful");
-            });
 
+    await newMeal.save()
+        .then(() => {
+            res.status(201).json(newMeal);
+        })
+        .catch((error) => {
+            res.status(400).json({ error: error.message });
+        });
 });
 
 exports.getMeal = asyncHandler(async (req, res, next) => {
-    const meal = await Meal.findById(req.params.oid).select(
-    'datetime cal fat carbs proteins sodium waste mealdesc mealname foodgroups').exec();
+    const meal = await Meal.findById(req.params.oid)
+        .select('datetime cal fat carbs proteins fibers sugars sodium waste mealdesc mealname foodgroups')
+        .exec();
 
     if (meal === null) {
-        console.log(err);
-        res.status(404).send("Meal cannot be found");
+        return res.status(404).send("Meal cannot be found");
     }
 
-    res.status(201).json(meal);
+    res.status(200).json(meal);
 });
 
 exports.getAllMeals = asyncHandler(async (req, res, next) => {
-    const meals = await Meal.find({uid: req.params.uid}).select(
-        'datetime cal fat carbs proteins sodium waste mealdesc mealname foodgroups').exec();
-    console.log(meals)
+    const meals = await Meal.find({ uid: req.params.uid })
+        .select('datetime cal fat carbs proteins fibers sugars sodium waste mealdesc mealname foodgroups')
+        .exec();
+
     if (meals === null) {
-        console.log(err)
-        res.status(404).send("Meals cannot be found");
+        return res.status(404).send("Meals cannot be found");
     }
 
     res.status(200).json(meals);
 });
-
-
-// deprecated function
-// exports.uploadMealPicture = asyncHandler(async (req, res, next) => {
-//     console.log(req.body, req.files)
-// });
-
-//uploadMealBounds
