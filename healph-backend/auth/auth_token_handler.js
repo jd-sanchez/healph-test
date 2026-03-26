@@ -10,18 +10,18 @@ exports.adminAuth  = (req, res, next) => {
         jwt.verify(token, 'HealPHAdminScrambler', async (err, decodedToken) => {
           if (err) {
             console.log(err.message);
-            res.redirect('/redirect');
+            return res.status(401).json({ error: 'Insufficient permissions. Please log in.' });
           } else {
             console.log(decodedToken);
             let admin = await Admin.findById(decodedToken.id);
-            if(!admin){
-              res.redirect('/redirect');
+            if (!admin) {
+              return res.status(401).json({ error: 'Insufficient permissions. Please log in.' });
             }
             next();
           }
         });
       } else {
-        res.redirect('/redirect');
+        return res.status(401).json({ error: 'Insufficient permissions. Please log in.' });
       }
     };
 
@@ -32,17 +32,17 @@ exports.userAuth = (req, res, next) => {
     jwt.verify(token, 'HealPHScrambler', async (err, decodedToken) => {
       if (err) {
         console.log(err.message);
-        res.redirect('/redirect');
+        return res.status(401).json({ error: 'Insufficient permissions. Please log in.' });
       } else {
         console.log(decodedToken);
         let user = await User.findById(decodedToken.id);
-        if(!user){
-          res.redirect('/redirect');
+        if (!user) {
+          return res.status(401).json({ error: 'Insufficient permissions. Please log in.' });
         }
         next();
       }
     });
   } else {
-    res.redirect('/redirect');
+    return res.status(401).json({ error: 'Insufficient permissions. Please log in.' });
   }
 }
