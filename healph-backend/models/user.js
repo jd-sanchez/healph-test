@@ -26,7 +26,8 @@ const userSchema = new Schema({
   diet: { type: String },
   lifestyle: { type: String },
   weight: { type: Number, min: 0 },
-  height: { type: Number, min: 0 }
+  height: { type: Number, min: 0 },
+  googleId: { type: String, sparse: true }
 });
 
 userSchema.virtual('fullName').get(function () {

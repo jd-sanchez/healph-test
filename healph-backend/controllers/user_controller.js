@@ -2,6 +2,10 @@ const asyncHandler = require('express-async-handler');
 const {User, EmpUser, Student} = require('../models/user.js');
 const path = require("node:path");
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
+const crypto = require('crypto');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const maxAge = 28 * 24 * 60 * 60;
 const createToken = (id) => {
@@ -245,8 +249,127 @@ exports.uploadPicture = asyncHandler(async (req, res, next) => {
     res.status(200).send("Success");
 });
 
+// Completes the profile for a Google sign-in user who went through onboarding.
+// Updates all fields that were left as placeholders during stub creation.
+exports.completeProfile = asyncHandler(async (req, res, next) => {
+    const { uid } = req.params;
+    const {
+        username, firstName, lastName, middleInitial, suffix,
+        sex, birthday, region, town,
+        userType,
+        studentnum, college, degree,
+        empnum, unit,
+        illnesses, allergies, diet, lifestyle, weight, height,
+    } = req.body;
+
+    try {
+        const updateFields = {
+            uname: username,
+            'name.fname': firstName,
+            'name.lname': lastName,
+            'name.mi': middleInitial ?? '',
+            'name.suffix': suffix ?? '',
+            sex,
+            bday: birthday,
+            'loc.region': region ?? '',
+            'loc.town': town ?? '',
+            college: college ?? '',
+            illnesses: illnesses ?? [],
+            allergies: allergies ?? [],
+            diet: diet ?? '',
+            lifestyle: lifestyle ?? '',
+            weight: parseFloat(weight) || 0,
+            height: parseFloat(height) || 0,
+        };
+
+        if (userType === 'student') {
+            updateFields.studentnum = parseInt(studentnum) || 0;
+            updateFields.deg = degree ?? '';
+        } else {
+            updateFields.empnum = parseInt(empnum) || 0;
+            updateFields.unit = unit ?? '';
+        }
+
+        await User.findByIdAndUpdate(uid, { $set: updateFields }, { runValidators: false });
+        res.status(200).json({ message: 'Profile completed.' });
+    } catch (err) {
+        console.error('completeProfile error:', err);
+        if (err.code === 11000) {
+            return res.status(400).json({ error: 'That username is already taken.' });
+        }
+        res.status(500).json({ error: 'Failed to update profile.' });
+    }
+});
+
 exports.updatePassword = asyncHandler(async (req, res, next) => {
 
     await User.findByIdAndUpdate(req.params.uid, {password: req.body.password});
     res.status(200).send("Success");
+});
+
+exports.googleLogin = asyncHandler(async (req, res, next) => {
+    const { idToken } = req.body;
+    if (!idToken) {
+        return res.status(400).json({ error: 'idToken is required.' });
+    }
+
+    // Verify the Google ID token
+    let payload;
+    try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        payload = ticket.getPayload();
+    } catch (err) {
+        console.error('Google token verification failed:', err.message);
+        return res.status(401).json({ error: 'Invalid Google ID token.' });
+    }
+
+    const { sub: googleId, email, name, given_name, family_name } = payload;
+
+    // Find existing user by googleId first, then fall back to email
+    let user = await User.findOne({ googleId }).exec()
+        ?? await User.findOne({ email }).exec();
+
+    if (user) {
+        // Link the googleId if this user signed up with email/password before
+        if (!user.googleId) {
+            user.googleId = googleId;
+            await user.save();
+        }
+    } else {
+        // New Google user — create a stub StudentUser with neutral placeholders.
+        // The user will fill in their real profile during the onboarding flow.
+        const baseUname = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').slice(0, 16);
+        const uname = baseUname + crypto.randomBytes(3).toString('hex');
+        const placeholderPass = crypto.randomBytes(12).toString('base64').slice(0, 16);
+
+        try {
+            user = new Student({
+                email,
+                pass: placeholderPass,
+                uname,
+                name: { fname: 'Pending', lname: 'User' },
+                sex: 'unset',
+                bday: 'Jan 01 2000',
+                googleId,
+            });
+            await user.save();
+        } catch (err) {
+            console.error('Failed to create Google user:', err);
+            if (err.code === 11000) {
+                return res.status(400).json({ error: 'An account with this email already exists.' });
+            }
+            return res.status(500).json({ error: 'Failed to create account.' });
+        }
+
+        const token = createToken(user._id);
+        res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+        return res.status(200).json({ user: user._id, isNewUser: true });
+    }
+
+    const token = createToken(user._id);
+    res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.status(200).json({ user: user._id, isNewUser: false });
 });

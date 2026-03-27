@@ -21,6 +21,7 @@ router.get("/unique", UserController.checkUnique);
 router.post("/signup-student", UserController.signupStudent);
 router.post("/signup-employee", UserController.signupEmployee);
 router.post("/login", UserController.login);
+router.post("/google-login", UserController.googleLogin);
 router.get("/logout", Auth.userAuth, UserController.logout);
 router.post("/upload-pic/:uid", Auth.userAuth,  upload.single("image"), function (req, res){
     console.log(req.file);
@@ -30,6 +31,7 @@ router.get("/get-user/:uid", Auth.userAuth, UserController.getUser);
 router.get("/get-full-name/:uid", Auth.userAuth, UserController.getFullName);
 router.get("/get-pic/:uid", Auth.userAuth, UserController.getProfilePicture);
 router.get("/get-age/:uid", Auth.userAuth, UserController.getUserAge);
+router.patch("/complete-profile/:uid", Auth.userAuth, UserController.completeProfile);
 router.patch("/update-metrics/:uid", Auth.userAuth, UserController.updateMetrics);
 router.patch("/update-bio/:uid", Auth.userAuth, UserController.updateBio);
 router.patch("/update-password/:uid", Auth.userAuth, UserController.updatePassword);
