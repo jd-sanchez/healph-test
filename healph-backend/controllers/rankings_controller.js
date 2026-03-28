@@ -5,9 +5,10 @@ const Meal = require('../models/meal.js');
 exports.dailyRankings = asyncHandler(async (req, res, next) => {
     const dailydate = new Date();
     dailydate.setDate(dailydate.getDate()-1);
+    const dailydateStr = dailydate.toISOString().slice(0,10);
 
     const rankings = await Daily_Intake.aggregate([//only accept intakes that were submitted
-        {'$match': {date: dailydate}},
+        {'$match': {date: dailydateStr}},
         {'$sort': {'hale': -1}}, 
         {'$lookup': {
             'from': 'users',
@@ -60,13 +61,8 @@ exports.weeklyRankings = asyncHandler(async (req, res, next) => {
 
 //monthly rankings
 exports.monthlyRankings = asyncHandler(async (req, res, next) => {
-    let month_date = new Array();
+    const month = new Date().toISOString().slice(0,7);
 
-    let dailydate = new Date();
-    
-    let month = 
-        month_date.push(dailydate.toISOString().slice(0,7));
-    
     const rankings = await Daily_Intake.aggregate([ //only accept intakes that were submitted
         {'$match': {$expr: { $eq: [month, {$substrCP: [ "$date", 0, 7]} ]  } } },
         {'$group': {
