@@ -16,8 +16,8 @@ const createToken = (id) => {
 
 
 exports.checkUnique = asyncHandler(async (req, res, next) => {
-    const checkUname = await User.exists({uname: req.body.username});
-    const checkEmail = await User.exists({email: req.body.email});
+    const checkUname = await User.exists({uname: req.query.username});
+    const checkEmail = await User.exists({email: req.query.email});
     let uniqueUname = true;
     let uniqueEmail = true;
     if (checkUname){
