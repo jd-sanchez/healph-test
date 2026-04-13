@@ -3,8 +3,8 @@ const router = express.Router();
 const EventController = require('../controllers/event_controller.js');
 const Auth = require('../auth/auth_token_handler.js');
 
-// Any authenticated user can read events
-router.get('/getall', Auth.userAuth, EventController.getAllEvents);
+// Public — both users and admins need to read events
+router.get('/getall', EventController.getAllEvents);
 router.post('/join/:id', Auth.userAuth, EventController.joinEvent);
 router.post('/leave/:id', Auth.userAuth, EventController.leaveEvent);
 
