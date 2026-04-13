@@ -27,7 +27,11 @@ const userSchema = new Schema({
   lifestyle: { type: String },
   weight: { type: Number, min: 0 },
   height: { type: Number, min: 0 },
-  googleId: { type: String, sparse: true }
+  googleId: { type: String, sparse: true },
+  calorieGoal: { type: Number, default: 2000 },
+  stepsGoal: { type: Number, default: 10000 },
+  waterGoal: { type: Number, default: 8 },
+  sleepGoal: { type: Number, default: 8 },
 });
 
 userSchema.virtual('fullName').get(function () {

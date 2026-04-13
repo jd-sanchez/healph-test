@@ -35,6 +35,8 @@ router.patch("/complete-profile/:uid", Auth.userAuth, UserController.completePro
 router.patch("/update-metrics/:uid", Auth.userAuth, UserController.updateMetrics);
 router.patch("/update-bio/:uid", Auth.userAuth, UserController.updateBio);
 router.patch("/update-password/:uid", Auth.userAuth, UserController.updatePassword);
+router.get("/get-goals/:uid", Auth.userAuth, UserController.getGoals);
+router.patch("/update-goals/:uid", Auth.userAuth, UserController.updateGoals);
 //router.get("/confirm-user/:uid", UserController.confirmUser);
 
 module.exports = router;

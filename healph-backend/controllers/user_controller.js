@@ -309,6 +309,29 @@ exports.completeProfile = asyncHandler(async (req, res, next) => {
     }
 });
 
+exports.getGoals = asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.params.uid)
+        .select('calorieGoal stepsGoal waterGoal sleepGoal')
+        .exec();
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    res.status(200).json({
+        calorieGoal: user.calorieGoal ?? 2000,
+        stepsGoal: user.stepsGoal ?? 10000,
+        waterGoal: user.waterGoal ?? 8,
+        sleepGoal: user.sleepGoal ?? 8,
+    });
+});
+
+exports.updateGoals = asyncHandler(async (req, res, next) => {
+    const { calorieGoal, stepsGoal, waterGoal, sleepGoal } = req.body;
+    await User.findByIdAndUpdate(
+        req.params.uid,
+        { $set: { calorieGoal, stepsGoal, waterGoal, sleepGoal } },
+        { runValidators: false }
+    );
+    res.status(200).json({ message: 'Goals updated.' });
+});
+
 exports.updatePassword = asyncHandler(async (req, res, next) => {
 
     await User.findByIdAndUpdate(req.params.uid, {password: req.body.password});
