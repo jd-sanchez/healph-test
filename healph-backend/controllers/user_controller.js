@@ -238,18 +238,18 @@ exports.updateMetrics = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateBio = asyncHandler(async (req, res, next) => {
-    const user = await User.findByIdAndUpdate(req.params.uid, {
+    await User.findByIdAndUpdate(req.params.uid, {
         $set: {
-            fname: req.body.firstName,
-            lname: req.body.lastName,
-            mi: req.body.middleInitial,
-            suffix: req.body.suffix,
+            'name.fname': req.body.firstName,
+            'name.lname': req.body.lastName,
+            'name.mi': req.body.middleInitial,
+            'name.suffix': req.body.suffix,
             sex: req.body.sex,
-            location: req.body.location,
-            uni: req.body.uni,
-            degree: req.body.degree
+            'loc.region': req.body.region,
+            'loc.town': req.body.town,
+            college: req.body.college,
         }
-    }, {new: true} );
+    }, { new: true, runValidators: false });
     res.status(200).send("Success");
 });
 

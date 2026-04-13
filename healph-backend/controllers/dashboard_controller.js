@@ -122,7 +122,7 @@ exports.getIntakeStatsDaily = asyncHandler(async (req, res, next) => {
         {'$group': {
             _id: null,
             'hale': {'$avg': '$hale'},
-            'phd': {'$avg': '$phd'},
+            'mealDiversity': {'$avg': '$mealDiversity'},
             'steps': {'$avg': '$steps'},
             'sleephrs': {'$avg': '$sleephrs'},
             'waterglass': {'$avg': '$waterglass'},
@@ -135,7 +135,7 @@ exports.getIntakeStatsDaily = asyncHandler(async (req, res, next) => {
 exports.getIntakeStatsWeekly = asyncHandler(async (req, res, next) => {
     let startdate = new Date();
     let lastdate = new Date();
-    
+
     startdate.setDate(startdate.getDate() - 1);
     lastdate.setDate(lastdate.getDate() - 8);
     console.log(startdate, lastdate);
@@ -144,7 +144,7 @@ exports.getIntakeStatsWeekly = asyncHandler(async (req, res, next) => {
         {'$group': {
             _id: null,
             'hale': {'$avg': '$hale'},
-            'phd': {'$avg': '$phd'},
+            'mealDiversity': {'$avg': '$mealDiversity'},
             'steps': {'$avg': '$steps'},
             'sleephrs': {'$avg': '$sleephrs'},
             'waterglass': {'$avg': '$waterglass'},
