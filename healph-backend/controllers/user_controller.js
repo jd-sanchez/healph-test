@@ -158,6 +158,7 @@ exports.getUser = asyncHandler(async (req, res, next) => {
             lifestyle: user.lifestyle,
             weight: user.weight,
             height: user.height,
+            profilePicUrl: user.profilePicUrl ?? '',
         });
     } else if (user.__t == "StudentUser") {
         return res.status(200).json({
@@ -177,6 +178,7 @@ exports.getUser = asyncHandler(async (req, res, next) => {
             lifestyle: user.lifestyle,
             weight: user.weight,
             height: user.height,
+            profilePicUrl: user.profilePicUrl ?? '',
         });
     }
 
@@ -187,6 +189,7 @@ exports.getUser = asyncHandler(async (req, res, next) => {
         name: user.name,
         sex: user.sex,
         bday: user.bday,
+        profilePicUrl: user.profilePicUrl ?? '',
     });
 });
 
@@ -307,6 +310,16 @@ exports.completeProfile = asyncHandler(async (req, res, next) => {
         }
         res.status(500).json({ error: 'Failed to update profile.' });
     }
+});
+
+exports.updateProfilePicUrl = asyncHandler(async (req, res, next) => {
+    const { profilePicUrl } = req.body;
+    await User.findByIdAndUpdate(
+        req.params.uid,
+        { $set: { profilePicUrl } },
+        { runValidators: false }
+    );
+    res.status(200).json({ message: 'Profile picture updated.' });
 });
 
 exports.getGoals = asyncHandler(async (req, res, next) => {

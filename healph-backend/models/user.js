@@ -32,6 +32,7 @@ const userSchema = new Schema({
   stepsGoal: { type: Number, default: 10000 },
   waterGoal: { type: Number, default: 8 },
   sleepGoal: { type: Number, default: 8 },
+  profilePicUrl: { type: String, default: '' },
 });
 
 userSchema.virtual('fullName').get(function () {

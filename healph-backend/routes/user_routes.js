@@ -37,6 +37,7 @@ router.patch("/update-bio/:uid", Auth.userAuth, UserController.updateBio);
 router.patch("/update-password/:uid", Auth.userAuth, UserController.updatePassword);
 router.get("/get-goals/:uid", Auth.userAuth, UserController.getGoals);
 router.patch("/update-goals/:uid", Auth.userAuth, UserController.updateGoals);
+router.patch("/update-pic-url/:uid", Auth.userAuth, UserController.updateProfilePicUrl);
 //router.get("/confirm-user/:uid", UserController.confirmUser);
 
 module.exports = router;
