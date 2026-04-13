@@ -17,6 +17,7 @@ const indexRouter = require("./routes/index");
 const rankingRouter = require("./routes/ranking_routes.js");
 const adminRouter = require("./routes/admin_routes.js");
 const dashboardRouter = require("./routes/dashboard_routes.js");
+const eventRouter = require("./routes/event_routes.js");
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.use("/reports", reportRouter);
 app.use("/dashboard", dashboardRouter);
 app.use("/rankings", rankingRouter);
 app.use("/admins", adminRouter);
+app.use("/events", eventRouter);
 app.use("/redirect", (req, res) => {
   throw Error(
     "Insufficient Permissions. Please log in before attempting to access this data."
