@@ -64,6 +64,7 @@ exports.dailyRankings = asyncHandler(async (req, res) => {
           score: `$${field}`,
           date: 1,
           user: '$user.name',
+          photoUrl: { $arrayElemAt: ['$user.profilePicUrl', 0] },
         },
       },
       { $limit: 100 },
@@ -122,7 +123,7 @@ exports.weeklyRankings = asyncHandler(async (req, res) => {
           as: 'user',
         },
       },
-      { $project: { score: 1, user: '$user.name' } },
+      { $project: { score: 1, user: '$user.name', photoUrl: { $arrayElemAt: ['$user.profilePicUrl', 0] } } },
       { $limit: 100 },
     ]),
     Daily_Intake.aggregate([
@@ -172,7 +173,7 @@ exports.monthlyRankings = asyncHandler(async (req, res) => {
           as: 'user',
         },
       },
-      { $project: { score: 1, user: '$user.name' } },
+      { $project: { score: 1, user: '$user.name', photoUrl: { $arrayElemAt: ['$user.profilePicUrl', 0] } } },
       { $limit: 100 },
     ]),
     Daily_Intake.aggregate([
