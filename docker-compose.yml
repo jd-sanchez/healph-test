@@ -5,7 +5,7 @@ services:
       context: ./healph-backend/
       dockerfile: ./Dockerfile
     container_name: healph-backend
-    image: node:16.20.0-alpine
+    image: node:18-alpine
     #restart: always
     ports:
       - "3000:3000"
