@@ -1,12 +1,10 @@
 FROM node:16.20.0-alpine
 
 WORKDIR /healph-backend/
-#extracts to /healph/backend except node_modules
 COPY . ./
 RUN npm install
+# Create runtime directories that are gitignored and won't exist in the cloned repo
+RUN mkdir -p /healph-backend/log /healph-backend/profpics
 
 EXPOSE 3000
-#    from    to
 CMD ["npm", "start"]
-
-#change if necessary

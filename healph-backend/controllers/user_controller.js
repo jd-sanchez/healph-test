@@ -9,7 +9,7 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const maxAge = 28 * 24 * 60 * 60;
 const createToken = (id) => {
-    return jwt.sign({ id }, 'HealPHScrambler', {
+    return jwt.sign({ id }, process.env.JWT_SECRET || 'HealPHScrambler', {
       expiresIn: maxAge
     });
   };
@@ -125,7 +125,7 @@ exports.login = asyncHandler(async (req, res, next) => {
         res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
         res.status(200).json({ user: user._id });
     } catch (err) {
-        res.status(400).json(err);
+        res.status(401).json({ error: 'Invalid email or password.' });
     }
 });
 
@@ -137,8 +137,13 @@ exports.logout = asyncHandler(async (req, res, next) => {
 exports.getUser = asyncHandler(async (req, res, next) => {
     const user = await User.findById(req.params.uid).exec();
 
+    if (user === null) {
+        return res.status(404).json({ error: 'User cannot be found.' });
+    }
+
     if (user.__t == "EmpUser") {
-        res.status(200).json({
+        return res.status(200).json({
+            username: user.uname,
             uname: user.uname,
             name: user.name,
             sex: user.sex,
@@ -152,15 +157,16 @@ exports.getUser = asyncHandler(async (req, res, next) => {
             diet: user.diet,
             lifestyle: user.lifestyle,
             weight: user.weight,
-            height: user.height
+            height: user.height,
         });
     } else if (user.__t == "StudentUser") {
-        res.status(200).json({
+        return res.status(200).json({
+            username: user.uname,
             uname: user.uname,
             name: user.name,
             sex: user.sex,
             bday: user.bday,
-            loc: user.uname,
+            loc: user.loc,
             studentnum: user.studentnum,
             college: user.college,
             deg: user.deg,
@@ -170,16 +176,18 @@ exports.getUser = asyncHandler(async (req, res, next) => {
             diet: user.diet,
             lifestyle: user.lifestyle,
             weight: user.weight,
-            height: user.height
+            height: user.height,
         });
     }
 
-    if (user === null) {
-        res.status(404).send("User cannot be found");
-    }
-    
-
-    
+    // Fallback for base User type (e.g. admin-created stubs)
+    return res.status(200).json({
+        username: user.uname,
+        uname: user.uname,
+        name: user.name,
+        sex: user.sex,
+        bday: user.bday,
+    });
 });
 
 exports.getFullName = asyncHandler(async (req, res, next) => {

@@ -7,7 +7,7 @@ exports.adminAuth  = (req, res, next) => {
     const token = req.cookies.jwt;
 
       if (token) {
-        jwt.verify(token, 'HealPHAdminScrambler', async (err, decodedToken) => {
+        jwt.verify(token, process.env.JWT_ADMIN_SECRET || 'HealPHAdminScrambler', async (err, decodedToken) => {
           if (err) {
             console.log(err.message);
             return res.status(401).json({ error: 'Insufficient permissions. Please log in.' });
@@ -29,7 +29,7 @@ exports.userAuth = (req, res, next) => {
   const token = req.cookies.jwt;
 
   if (token) {
-    jwt.verify(token, 'HealPHScrambler', async (err, decodedToken) => {
+    jwt.verify(token, process.env.JWT_SECRET || 'HealPHScrambler', async (err, decodedToken) => {
       if (err) {
         console.log(err.message);
         return res.status(401).json({ error: 'Insufficient permissions. Please log in.' });

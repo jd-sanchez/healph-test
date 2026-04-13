@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const maxAge = 1 * 24 * 60 * 60;
 const createToken = (id) => {
-    return jwt.sign({ id }, 'HealPHAdminScrambler', {
+    return jwt.sign({ id }, process.env.JWT_ADMIN_SECRET || 'HealPHAdminScrambler', {
       expiresIn: maxAge
     });
   };
@@ -33,7 +33,7 @@ exports.login = asyncHandler(async (req, res, next) => {
         res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
         res.status(200).json({ admin: admin._id });
     } catch (err) {
-        res.status(400).json(err);
+        res.status(401).json({ error: 'Invalid admin credentials.' });
     }
 });
 

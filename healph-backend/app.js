@@ -24,9 +24,7 @@ const app = express();
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 
-const dev_db_url =
-  "mongodb+srv://testadmin:MaDFhk14d6RNVcjo@cluster0.9fuqzsp.mongodb.net/healph";
-const mongoDB = process.env.MONGODB_URI || dev_db_url;
+const mongoDB = process.env.MONGODB_URI;
 
 
 var accessLogStream = rfs.createStream('access.log', {
@@ -45,8 +43,8 @@ app.set("view engine", "pug");
 
 app.use(
   cors({
-    origin: "http://localhost:5000", // Replace with client's domain
-    credentials: true, // Enable credentials (cookies, HTTP credentials)
+    origin: true, // Reflects request origin — required for mobile clients (no fixed origin)
+    credentials: true,
   })
 );
 
