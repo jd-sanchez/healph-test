@@ -6,6 +6,7 @@ exports.newMeal = asyncHandler(async (req, res, next) => {
         uid: req.body.uid,
         dailyid: req.body.dailyid,
         datetime: req.body.datetime,
+        pic: req.body.pic ?? '',
         cal: req.body.cal,
         fat: req.body.fat,
         carbs: req.body.carbs,
@@ -30,7 +31,7 @@ exports.newMeal = asyncHandler(async (req, res, next) => {
 
 exports.getMeal = asyncHandler(async (req, res, next) => {
     const meal = await Meal.findById(req.params.oid)
-        .select('datetime cal fat carbs proteins fibers sugars sodium waste mealdesc mealname foodgroups')
+        .select('datetime pic cal fat carbs proteins fibers sugars sodium waste mealdesc mealname foodgroups')
         .exec();
 
     if (meal === null) {
@@ -42,7 +43,7 @@ exports.getMeal = asyncHandler(async (req, res, next) => {
 
 exports.getAllMeals = asyncHandler(async (req, res, next) => {
     const meals = await Meal.find({ uid: req.params.uid })
-        .select('datetime cal fat carbs proteins fibers sugars sodium waste mealdesc mealname foodgroups')
+        .select('datetime pic cal fat carbs proteins fibers sugars sodium waste mealdesc mealname foodgroups')
         .exec();
 
     if (meals === null) {
