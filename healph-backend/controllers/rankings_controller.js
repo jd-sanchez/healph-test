@@ -39,7 +39,6 @@ exports.dailyRankings = asyncHandler(async (req, res) => {
   const field = _metricField(req.query.metric);
 
   const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = _dateStr(yesterday);
 
   const dayBefore = new Date(yesterday);
@@ -114,7 +113,7 @@ exports.weeklyRankings = asyncHandler(async (req, res) => {
 
   const [current, previous] = await Promise.all([
     Daily_Intake.aggregate([
-      ..._groupPipeline(matchCurrent, field, 5),
+      ..._groupPipeline(matchCurrent, field, 1),
       {
         $lookup: {
           from: 'users',
@@ -127,7 +126,7 @@ exports.weeklyRankings = asyncHandler(async (req, res) => {
       { $limit: 100 },
     ]),
     Daily_Intake.aggregate([
-      ..._groupPipeline(matchPrev, field, 5),
+      ..._groupPipeline(matchPrev, field, 1),
       { $project: { _id: 1 } },
       { $limit: 100 },
     ]),
@@ -164,7 +163,7 @@ exports.monthlyRankings = asyncHandler(async (req, res) => {
 
   const [current, previous] = await Promise.all([
     Daily_Intake.aggregate([
-      ..._groupPipeline(monthMatch(month), field, 20),
+      ..._groupPipeline(monthMatch(month), field, 1),
       {
         $lookup: {
           from: 'users',
@@ -177,7 +176,7 @@ exports.monthlyRankings = asyncHandler(async (req, res) => {
       { $limit: 100 },
     ]),
     Daily_Intake.aggregate([
-      ..._groupPipeline(monthMatch(prevMonth), field, 20),
+      ..._groupPipeline(monthMatch(prevMonth), field, 1),
       { $project: { _id: 1 } },
       { $limit: 100 },
     ]),
