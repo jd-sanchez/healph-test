@@ -94,26 +94,26 @@ exports.dailyRankings = asyncHandler(async (req, res) => {
 
 exports.weeklyRankings = asyncHandler(async (req, res) => {
   const field = _metricField(req.query.metric);
+  const days = Math.max(1, parseInt(req.query.days) || 3);
 
-  // Current window: yesterday back 7 days (mirrors original logic)
+  // Current window: today back `days` days
   const now = new Date();
   const end = new Date(now);
-  end.setDate(end.getDate() - 1);
   const start = new Date(now);
-  start.setDate(start.getDate() - 8);
+  start.setDate(start.getDate() - (days - 1));
 
-  // Previous window: one week before that
+  // Previous window: same span immediately before the current window
   const prevEnd = new Date(start);
   prevEnd.setDate(prevEnd.getDate() - 1);
   const prevStart = new Date(prevEnd);
-  prevStart.setDate(prevStart.getDate() - 7);
+  prevStart.setDate(prevStart.getDate() - (days - 1));
 
   const matchCurrent = { $match: { date: { $gte: _dateStr(start), $lte: _dateStr(end) } } };
   const matchPrev = { $match: { date: { $gte: _dateStr(prevStart), $lte: _dateStr(prevEnd) } } };
 
   const [current, previous] = await Promise.all([
     Daily_Intake.aggregate([
-      ..._groupPipeline(matchCurrent, field, 1),
+      ..._groupPipeline(matchCurrent, field, days),
       {
         $lookup: {
           from: 'users',
@@ -126,7 +126,7 @@ exports.weeklyRankings = asyncHandler(async (req, res) => {
       { $limit: 100 },
     ]),
     Daily_Intake.aggregate([
-      ..._groupPipeline(matchPrev, field, 1),
+      ..._groupPipeline(matchPrev, field, days),
       { $project: { _id: 1 } },
       { $limit: 100 },
     ]),
@@ -149,21 +149,26 @@ exports.weeklyRankings = asyncHandler(async (req, res) => {
 
 exports.monthlyRankings = asyncHandler(async (req, res) => {
   const field = _metricField(req.query.metric);
+  const days = Math.max(1, parseInt(req.query.days) || 14);
 
+  // Current window: today back `days` days
   const now = new Date();
-  const month = now.toISOString().slice(0, 7);
+  const end = new Date(now);
+  const start = new Date(now);
+  start.setDate(start.getDate() - (days - 1));
 
-  // Previous calendar month
-  const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const prevMonth = prevDate.toISOString().slice(0, 7);
+  // Previous window: same span immediately before the current window
+  const prevEnd = new Date(start);
+  prevEnd.setDate(prevEnd.getDate() - 1);
+  const prevStart = new Date(prevEnd);
+  prevStart.setDate(prevStart.getDate() - (days - 1));
 
-  const monthMatch = (m) => ({
-    $match: { $expr: { $eq: [m, { $substrCP: ['$date', 0, 7] }] } },
-  });
+  const matchCurrent = { $match: { date: { $gte: _dateStr(start), $lte: _dateStr(end) } } };
+  const matchPrev    = { $match: { date: { $gte: _dateStr(prevStart), $lte: _dateStr(prevEnd) } } };
 
   const [current, previous] = await Promise.all([
     Daily_Intake.aggregate([
-      ..._groupPipeline(monthMatch(month), field, 1),
+      ..._groupPipeline(matchCurrent, field, days),
       {
         $lookup: {
           from: 'users',
@@ -176,7 +181,7 @@ exports.monthlyRankings = asyncHandler(async (req, res) => {
       { $limit: 100 },
     ]),
     Daily_Intake.aggregate([
-      ..._groupPipeline(monthMatch(prevMonth), field, 1),
+      ..._groupPipeline(matchPrev, field, days),
       { $project: { _id: 1 } },
       { $limit: 100 },
     ]),
