@@ -38,6 +38,7 @@ router.patch("/update-password/:uid", Auth.userAuth, UserController.updatePasswo
 router.get("/get-goals/:uid", Auth.userAuth, UserController.getGoals);
 router.patch("/update-goals/:uid", Auth.userAuth, UserController.updateGoals);
 router.patch("/update-pic-url/:uid", Auth.userAuth, UserController.updateProfilePicUrl);
+router.delete("/delete-account", Auth.userAuth, UserController.deleteAccount);
 //router.get("/confirm-user/:uid", UserController.confirmUser);
 
 module.exports = router;

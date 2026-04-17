@@ -1,5 +1,9 @@
 const asyncHandler = require('express-async-handler');
 const {User, EmpUser, Student} = require('../models/user.js');
+const Meal = require('../models/meal.js');
+const Intake = require('../models/daily_intake.js');
+const Report = require('../models/report.js');
+const Event = require('../models/event.js');
 const path = require("node:path");
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
@@ -416,4 +420,22 @@ exports.googleLogin = asyncHandler(async (req, res, next) => {
     const token = createToken(user._id);
     res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
     res.status(200).json({ user: user._id, isNewUser: false });
+});
+
+// Permanently deletes the authenticated user and all their associated data.
+exports.deleteAccount = asyncHandler(async (req, res, next) => {
+    const uid = req.user._id;
+    const uidStr = uid.toString();
+
+    await Meal.deleteMany({ uid });
+    await Intake.deleteMany({ uid });
+    await Report.deleteMany({ uid });
+    await Event.updateMany(
+        { participants: uidStr },
+        { $pull: { participants: uidStr } }
+    );
+    await User.findByIdAndDelete(uid);
+
+    res.cookie('jwt', '', { maxAge: 1 });
+    res.status(200).json({ message: 'Account deleted' });
 });

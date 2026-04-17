@@ -39,6 +39,7 @@ exports.userAuth = (req, res, next) => {
         if (!user) {
           return res.status(401).json({ error: 'Insufficient permissions. Please log in.' });
         }
+        req.user = user;
         next();
       }
     });
