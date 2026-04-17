@@ -14,9 +14,12 @@ function _metricField(metric) {
   return map[metric] || 'hale';
 }
 
-/** Formats a Date object as YYYY-MM-DD. */
+/** Formats a Date object as YYYY-MM-DD using local time (not UTC). */
 function _dateStr(d) {
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 
