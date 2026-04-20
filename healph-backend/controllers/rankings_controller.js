@@ -116,7 +116,7 @@ exports.weeklyRankings = asyncHandler(async (req, res) => {
 
   const [current, previous] = await Promise.all([
     Daily_Intake.aggregate([
-      ..._groupPipeline(matchCurrent, field, days),
+      ..._groupPipeline(matchCurrent, field, 3),
       {
         $lookup: {
           from: 'users',
@@ -129,7 +129,7 @@ exports.weeklyRankings = asyncHandler(async (req, res) => {
       { $limit: 100 },
     ]),
     Daily_Intake.aggregate([
-      ..._groupPipeline(matchPrev, field, days),
+      ..._groupPipeline(matchPrev, field, 3),
       { $project: { _id: 1 } },
       { $limit: 100 },
     ]),
@@ -171,7 +171,7 @@ exports.monthlyRankings = asyncHandler(async (req, res) => {
 
   const [current, previous] = await Promise.all([
     Daily_Intake.aggregate([
-      ..._groupPipeline(matchCurrent, field, days),
+      ..._groupPipeline(matchCurrent, field, 14),
       {
         $lookup: {
           from: 'users',
@@ -184,7 +184,7 @@ exports.monthlyRankings = asyncHandler(async (req, res) => {
       { $limit: 100 },
     ]),
     Daily_Intake.aggregate([
-      ..._groupPipeline(matchPrev, field, days),
+      ..._groupPipeline(matchPrev, field, 14),
       { $project: { _id: 1 } },
       { $limit: 100 },
     ]),
