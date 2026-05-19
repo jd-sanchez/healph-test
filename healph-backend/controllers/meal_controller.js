@@ -18,6 +18,7 @@ exports.newMeal = asyncHandler(async (req, res, next) => {
         mealdesc: req.body.mealdesc,
         mealname: req.body.mealname,
         foodgroups: req.body.foodgroups,
+        foodcategories: req.body.foodcategories ?? [],
     });
 
     await newMeal.save()

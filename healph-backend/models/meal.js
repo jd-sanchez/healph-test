@@ -19,6 +19,7 @@ const mealSchema = new Schema({
   mealdesc: { type: String },
   mealname: { type: String },
   foodgroups: { type: [String] },
+  foodcategories: { type: [String] },
 });
 
 mealSchema.plugin(mongoosePaginate);

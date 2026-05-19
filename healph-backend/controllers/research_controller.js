@@ -103,11 +103,12 @@ exports.foodPatterns = asyncHandler(async (req, res) => {
         if (req.query.to)   matchStage.datetime.$lte = new Date(req.query.to + 'T23:59:59Z');
     }
 
-    const [foodGroups, diversityStats] = await Promise.all([
-        // Top food groups by log frequency
+    const [topFoodItems, topFoodCategories, diversityStats] = await Promise.all([
+        // Top specific food items by log frequency
         Meal.aggregate([
             { $match: matchStage },
             { $unwind: '$foodgroups' },
+            { $match: { foodgroups: { $ne: '' } } },
             {
                 $group: {
                     _id:   '$foodgroups',
@@ -116,7 +117,22 @@ exports.foodPatterns = asyncHandler(async (req, res) => {
             },
             { $sort: { count: -1 } },
             { $limit: limit },
-            { $project: { _id: 0, foodGroup: '$_id', count: 1 } }
+            { $project: { _id: 0, foodItem: '$_id', count: 1 } }
+        ]),
+
+        // Top food categories by log frequency
+        Meal.aggregate([
+            { $match: matchStage },
+            { $unwind: '$foodcategories' },
+            { $match: { foodcategories: { $ne: '' } } },
+            {
+                $group: {
+                    _id:   '$foodcategories',
+                    count: { $sum: 1 },
+                }
+            },
+            { $sort: { count: -1 } },
+            { $project: { _id: 0, foodCategory: '$_id', count: 1 } }
         ]),
 
         // Average meal diversity from daily intakes
@@ -140,7 +156,8 @@ exports.foodPatterns = asyncHandler(async (req, res) => {
     ]);
 
     res.status(200).json({
-        topFoodGroups:    foodGroups,
+        topFoodItems,
+        topFoodCategories,
         diversitySummary: diversityStats[0] || { avgMealDiversity: null, totalRecords: 0 },
     });
 });
